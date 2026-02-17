@@ -325,10 +325,10 @@
         </div>
 
         <div class="tabs">
-            <button class="tab active" onclick="switchTab('entry')">➕ Entrée</button>
-            <button class="tab" onclick="switchTab('exit')">➖ Sortie</button>
-            <button class="tab" onclick="switchTab('history')">📋 Historique</button>
-            <button class="tab" onclick="switchTab('settings')">⚙️ Réglages</button>
+            <button class="tab active" onclick="switchTab('entry', event)">➕ Entrée</button>
+            <button class="tab" onclick="switchTab('exit', event)">➖ Sortie</button>
+            <button class="tab" onclick="switchTab('history', event)">📋 Historique</button>
+            <button class="tab" onclick="switchTab('settings', event)">⚙️ Réglages</button>
         </div>
 
         <!-- Entrée -->
@@ -475,7 +475,7 @@
             }
         };
         
-        let currentFilter = 'all'; // Pour le filtre de l'historique
+        let currentFilter = 'all';
 
         // Indicateur connexion
         let isOnline = navigator.onLine;
@@ -496,7 +496,6 @@
 
         // Charger les données au démarrage
         async function loadData() {
-            // Charger local en premier (instantané)
             const saved = localStorage.getItem('woodStockData');
             if (saved) {
                 data = JSON.parse(saved);
@@ -506,13 +505,11 @@
                 initUI();
             }
 
-            // Vérifier si Firebase est disponible
             if (typeof firebase === 'undefined') {
                 updateConnectionStatus(false);
                 return;
             }
 
-            // Écouter Firebase en temps réel avec timeout
             const timeoutId = setTimeout(() => {
                 console.log('Firebase timeout');
                 updateConnectionStatus(false);
@@ -523,7 +520,6 @@
                     clearTimeout(timeoutId);
                     if (snapshot.exists) {
                         const firebaseData = snapshot.data();
-                        // Prendre Firebase si plus récent ou si pas de local
                         const localTs = data.entries.length > 0 ? 
                             Math.max(...data.entries.map(e => e.timestamp || 0)) : 0;
                         const fbTs = firebaseData.entries && firebaseData.entries.length > 0 ?
@@ -537,7 +533,6 @@
                         }
                         updateConnectionStatus(true);
                     } else {
-                        // Pas de données dans Firebase, pousser les données locales
                         if (saved) {
                             docRef.set(JSON.parse(JSON.stringify(data)));
                         }
@@ -565,7 +560,6 @@
             updateDisplay();
         }
 
-        // Sauvegarder les données (local + Firebase)
         async function saveData() {
             localStorage.setItem('woodStockData', JSON.stringify(data));
             if (isOnline) {
@@ -578,7 +572,6 @@
             }
         }
 
-        // Calculer le stock restant
         function calculateStock() {
             const totalEntries = data.entries.reduce((sum, e) => sum + parseFloat(e.quantity), 0);
             const totalWheelbarrows = data.exits.reduce((sum, e) => sum + parseFloat(e.wheelbarrows), 0);
@@ -586,31 +579,25 @@
             return Math.max(0, totalEntries - steresUsed);
         }
 
-        // Calculer les jours restants basé sur la consommation moyenne
         function calculateDaysRemaining() {
             if (!data.settings.trackDays || data.exits.length < 2) {
                 return null;
             }
 
-            // Trier les sorties par date
             const sortedExits = [...data.exits].sort((a, b) => 
                 new Date(a.date).getTime() - new Date(b.date).getTime()
             );
 
-            // Calculer le nombre de jours entre première et dernière sortie
             const firstDate = new Date(sortedExits[0].date);
             const lastDate = new Date(sortedExits[sortedExits.length - 1].date);
             const daysDiff = Math.max(1, (lastDate - firstDate) / (1000 * 60 * 60 * 24));
 
-            // Calculer la consommation moyenne en brouettes par jour
             const totalWheelbarrows = data.exits.reduce((sum, e) => sum + parseInt(e.wheelbarrows), 0);
             const wheelbarrowsPerDay = totalWheelbarrows / daysDiff;
 
-            // Calculer les brouettes restantes
             const stock = calculateStock();
             const wheelbarrowsRemaining = stock * data.settings.wheelbarrowsPerStere;
 
-            // Calculer les jours restants
             const daysRemaining = wheelbarrowsPerDay > 0 ? Math.round(wheelbarrowsRemaining / wheelbarrowsPerDay) : 0;
 
             return {
@@ -619,7 +606,6 @@
             };
         }
 
-        // Mettre à jour l'affichage
         function updateDisplay() {
             const stock = calculateStock();
             const stockElement = document.getElementById('stockNumber');
@@ -627,7 +613,6 @@
             
             stockElement.textContent = stock.toFixed(1);
             
-            // Alerte stock faible
             if (stock <= data.settings.alertThreshold) {
                 stockElement.classList.add('low');
                 alertElement.classList.add('show');
@@ -636,10 +621,8 @@
                 alertElement.classList.remove('show');
             }
             
-            // Stats
             document.getElementById('totalEntries').textContent = data.entries.reduce((sum, e) => sum + parseFloat(e.quantity), 0).toFixed(1);
             
-            // Calculer la durée depuis la dernière sortie
             const lastExitElement = document.getElementById('lastExitDuration');
             if (data.exits.length > 0) {
                 const sortedExits = [...data.exits].sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -669,7 +652,6 @@
                 lastExitElement.textContent = "Aucune";
             }
             
-            // Jours restants
             const daysInfo = calculateDaysRemaining();
             const daysElement = document.getElementById('daysRemaining');
             
@@ -679,7 +661,6 @@
                 document.getElementById('consumptionRate').textContent = 
                     `Consommation moyenne : ${daysInfo.wheelbarrowsPerDay} brouettes/jour`;
                 
-                // Changer la couleur selon l'urgence
                 daysElement.classList.remove('warning', 'critical');
                 if (daysInfo.days <= 7) {
                     daysElement.classList.add('critical');
@@ -694,7 +675,6 @@
             updateExitEquivalent();
         }
 
-        // Ajouter une entrée
         function addEntry(event) {
             event.preventDefault();
             
@@ -715,7 +695,6 @@
             saveData();
             updateDisplay();
             
-            // Reset form
             event.target.reset();
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('entryDate').value = today;
@@ -723,7 +702,6 @@
             alert('✅ Entrée enregistrée !');
         }
 
-        // Ajouter une sortie
         function addExit(event) {
             event.preventDefault();
             
@@ -738,7 +716,6 @@
             saveData();
             updateDisplay();
             
-            // Reset form
             event.target.reset();
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('exitDate').value = today;
@@ -746,7 +723,6 @@
             alert('✅ Sortie enregistrée !');
         }
 
-        // Mettre à jour l'équivalent en stères pour les sorties
         function updateExitEquivalent() {
             const wheelbarrows = document.getElementById('exitWheelbarrows').value || 0;
             const steres = (wheelbarrows / data.settings.wheelbarrowsPerStere).toFixed(2);
@@ -755,17 +731,14 @@
 
         document.getElementById('exitWheelbarrows').addEventListener('input', updateExitEquivalent);
 
-        // Afficher l'historique
         function updateHistory() {
             const historyList = document.getElementById('historyList');
             
-            // Combiner et trier tous les mouvements
             let allMovements = [
                 ...data.entries.map(e => ({...e, type: 'entry'})),
                 ...data.exits.map(e => ({...e, type: 'exit'}))
             ].sort((a, b) => b.timestamp - a.timestamp);
             
-            // Appliquer le filtre
             if (currentFilter === 'entries') {
                 allMovements = allMovements.filter(m => m.type === 'entry');
             } else if (currentFilter === 'exits') {
@@ -778,7 +751,7 @@
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                         </svg>
-                        <p>Aucun mouvement ${currentFilter === 'entries' ? 'd\'entrée' : currentFilter === 'exits' ? 'de sortie' : ''} enregistré</p>
+                        <p>Aucun mouvement ${currentFilter === 'entries' ? "d'entrée" : currentFilter === 'exits' ? 'de sortie' : ''} enregistré</p>
                     </div>
                 `;
                 return;
@@ -789,19 +762,15 @@
                     let contactInfo = '';
                     if (m.phoneFixe || m.phoneMobile || m.phone || m.address) {
                         contactInfo = '<div style="margin-top: 8px; font-size: 13px; color: #555; background: #f9fafb; padding: 8px; border-radius: 6px;">';
-                        
-                        // Support ancien format (phone) et nouveau (phoneFixe/phoneMobile)
                         if (m.phoneFixe) {
                             contactInfo += `<div style="margin-bottom: 4px;"><a href="tel:${m.phoneFixe}" style="color: #ff6b35; text-decoration: none; font-weight: 600;">☎️ Fixe: ${m.phoneFixe}</a></div>`;
                         }
                         if (m.phoneMobile) {
                             contactInfo += `<div style="margin-bottom: 4px;"><a href="tel:${m.phoneMobile}" style="color: #ff6b35; text-decoration: none; font-weight: 600;">📱 Mobile: ${m.phoneMobile}</a></div>`;
                         }
-                        // Ancien format
                         if (m.phone && !m.phoneFixe && !m.phoneMobile) {
                             contactInfo += `<div style="margin-bottom: 4px;"><a href="tel:${m.phone}" style="color: #ff6b35; text-decoration: none; font-weight: 600;">📞 ${m.phone}</a></div>`;
                         }
-                        
                         if (m.address) {
                             contactInfo += `<div style="font-size: 12px; color: #666;">📍 ${m.address}</div>`;
                         }
@@ -843,25 +812,19 @@
             }).join('');
         }
         
-        // Filtrer l'historique
         function filterHistory(type) {
             currentFilter = type;
-            
-            // Mettre à jour l'apparence des boutons
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 btn.style.background = '#e5e7eb';
                 btn.style.color = '#333';
             });
-            
             const activeBtn = type === 'all' ? 'filterAll' : type === 'entries' ? 'filterEntries' : 'filterExits';
             const btn = document.getElementById(activeBtn);
             btn.style.background = '#ff6b35';
             btn.style.color = 'white';
-            
             updateHistory();
         }
 
-        // Formater la date
         function formatDate(dateString) {
             const date = new Date(dateString + 'T00:00:00');
             return date.toLocaleDateString('fr-FR', { 
@@ -871,7 +834,6 @@
             });
         }
 
-        // Sauvegarder les réglages
         function saveSettings() {
             data.settings.wheelbarrowsPerStere = parseInt(document.getElementById('wheelbarrowsPerStere').value);
             data.settings.alertThreshold = parseFloat(document.getElementById('alertThreshold').value);
@@ -880,24 +842,18 @@
             updateDisplay();
         }
 
-        // Changer d'onglet
-        function switchTab(tabName) {
-            // Masquer tous les contenus
+        // Changer d'onglet — event passé en paramètre pour corriger le bug
+        function switchTab(tabName, event) {
             document.querySelectorAll('.tab-content').forEach(content => {
                 content.classList.remove('active');
             });
-            
-            // Désactiver tous les onglets
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.classList.remove('active');
             });
-            
-            // Activer l'onglet et le contenu sélectionnés
             document.getElementById(tabName).classList.add('active');
             event.target.classList.add('active');
         }
 
-        // Exporter les données
         function exportData() {
             const dataStr = JSON.stringify(data, null, 2);
             const dataBlob = new Blob([dataStr], { type: 'application/json' });
@@ -909,49 +865,10 @@
             URL.revokeObjectURL(url);
         }
 
-        // Importer les données
         function importData() {
             document.getElementById('importFile').click();
         }
 
-        function handleImport(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const importedData = JSON.parse(e.target.result);
-                    if (confirm('⚠️ Attention : cela remplacera toutes vos données actuelles. Continuer ?')) {
-                        data = importedData;
-                        saveData();
-                        updateDisplay();
-                        alert('✅ Données importées avec succès !');
-                    }
-                } catch (error) {
-                    alert('❌ Erreur lors de l\'import. Fichier invalide.');
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        // Synchroniser manuellement vers Firebase
-        async function syncToFirebase() {
-            if (!isOnline) {
-                alert('❌ Pas de connexion internet !');
-                return;
-            }
-            try {
-                await docRef.set(JSON.parse(JSON.stringify(data)));
-                updateConnectionStatus(true);
-                alert('✅ Données synchronisées vers le cloud !');
-            } catch(e) {
-                alert('❌ Erreur de synchronisation: ' + e.message);
-            }
-        }
-        window.syncToFirebase = syncToFirebase;
-
-        // Modifier handleImport pour proposer fusion ou remplacement
         async function handleImport(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -961,19 +878,12 @@
                 try {
                     const importedData = JSON.parse(e.target.result);
                     const choice = confirm(
-                        '⚠️ Import de données
-
-' +
-                        'Cliquez OK pour REMPLACER toutes les données.
-' +
-                        'Cliquez Annuler pour FUSIONNER avec les données existantes.'
+                        '⚠️ Import de données\n\nCliquez OK pour REMPLACER toutes les données.\nCliquez Annuler pour FUSIONNER avec les données existantes.'
                     );
                     
                     if (choice) {
-                        // Remplacer
                         data = importedData;
                     } else {
-                        // Fusionner (ajouter sans doublons basé sur timestamp)
                         const existingTimestamps = new Set([
                             ...data.entries.map(e => e.timestamp),
                             ...data.exits.map(e => e.timestamp)
@@ -988,24 +898,37 @@
                     updateDisplay();
                     alert('✅ Données importées et synchronisées !');
                 } catch (error) {
-                    alert('❌ Erreur lors de l'import. Fichier invalide.');
+                    alert("❌ Erreur lors de l'import. Fichier invalide.");
                 }
             };
             reader.readAsText(file);
         }
-        window.handleImport = handleImport;
 
-        // Exposer les fonctions globalement (nécessaire avec type="module")
+        async function syncToFirebase() {
+            if (!isOnline) {
+                alert('❌ Pas de connexion internet !');
+                return;
+            }
+            try {
+                await docRef.set(JSON.parse(JSON.stringify(data)));
+                updateConnectionStatus(true);
+                alert('✅ Données synchronisées vers le cloud !');
+            } catch(e) {
+                alert('❌ Erreur de synchronisation: ' + e.message);
+            }
+        }
+
         window.addEntry = addEntry;
         window.addExit = addExit;
         window.switchTab = switchTab;
         window.filterHistory = filterHistory;
         window.exportData = exportData;
         window.importData = importData;
+        window.handleImport = handleImport;
         window.saveSettings = saveSettings;
+        window.syncToFirebase = syncToFirebase;
         window.updateExitEquivalent = updateExitEquivalent;
 
-        // Charger les données au démarrage
         loadData();
         updateConnectionStatus(navigator.onLine);
     </script>
