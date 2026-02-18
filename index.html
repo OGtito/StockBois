@@ -327,8 +327,8 @@
 
             <div class="stats">
                 <div class="stat-box">
-                    <div class="stat-value" id="totalEntries">0</div>
-                    <div class="stat-label">Entrées totales</div>
+                    <div class="stat-value" id="totalWheelbarrowsLeft">0</div>
+                    <div class="stat-label">Brouettes restantes</div>
                 </div>
                 <div class="stat-box">
                     <div class="stat-value" id="lastExitDuration">-</div>
@@ -640,7 +640,7 @@
                 alertElement.classList.remove('show');
             }
             
-            document.getElementById('totalEntries').textContent = data.entries.reduce((sum, e) => sum + parseFloat(e.quantity), 0).toFixed(1);
+            document.getElementById('totalWheelbarrowsLeft').textContent = Math.round(stock * data.settings.wheelbarrowsPerStere);
             
             const lastExitElement = document.getElementById('lastExitDuration');
             if (data.exits.length > 0) {
