@@ -292,7 +292,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🪵 StockBois</h1>
+            <h1><img src="data:image/png;base64,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" style="height:40px; vertical-align:middle; margin-right:8px;"> StockBois</h1>
             <div id="connectionStatus" style="font-size: 13px; margin-top: 5px;">🟡 Connexion...</div>
         </div>
 
@@ -795,6 +795,10 @@
                                 <div>${m.quantity} stères × ${m.price}€ = ${(m.quantity * m.price).toFixed(2)}€</div>
                                 ${notesInfo}
                             </div>
+                            <div style="display:flex; gap:8px; margin-top:10px;">
+                                <button onclick="editEntry(${m.timestamp})" style="flex:1; padding:8px; background:#fff4e6; border:1px solid #ff9a56; border-radius:8px; color:#ff6b35; font-weight:600; cursor:pointer;">✏️ Modifier</button>
+                                <button onclick="deleteEntry(${m.timestamp})" style="flex:1; padding:8px; background:#fee2e2; border:1px solid #ef4444; border-radius:8px; color:#991b1b; font-weight:600; cursor:pointer;">🗑️ Supprimer</button>
+                            </div>
                         </div>
                     `;
                 } else {
@@ -805,6 +809,10 @@
                             <div class="history-details">
                                 <div class="history-date">${formatDate(m.date)}</div>
                                 <div>${m.wheelbarrows} brouettes (≈ ${steres} stères)</div>
+                            </div>
+                            <div style="display:flex; gap:8px; margin-top:10px;">
+                                <button onclick="editExit(${m.timestamp})" style="flex:1; padding:8px; background:#fff4e6; border:1px solid #ff9a56; border-radius:8px; color:#ff6b35; font-weight:600; cursor:pointer;">✏️ Modifier</button>
+                                <button onclick="deleteExit(${m.timestamp})" style="flex:1; padding:8px; background:#fee2e2; border:1px solid #ef4444; border-radius:8px; color:#991b1b; font-weight:600; cursor:pointer;">🗑️ Supprimer</button>
                             </div>
                         </div>
                     `;
@@ -918,6 +926,102 @@
             }
         }
 
+        // Supprimer une entrée
+        function deleteEntry(timestamp) {
+            if (!confirm('⚠️ Supprimer cette entrée ? Cette action est irréversible.')) return;
+            data.entries = data.entries.filter(e => e.timestamp !== timestamp);
+            saveData();
+            updateDisplay();
+        }
+
+        // Supprimer une sortie
+        function deleteExit(timestamp) {
+            if (!confirm('⚠️ Supprimer cette sortie ? Cette action est irréversible.')) return;
+            data.exits = data.exits.filter(e => e.timestamp !== timestamp);
+            saveData();
+            updateDisplay();
+        }
+
+        // Modifier une entrée
+        function editEntry(timestamp) {
+            const entry = data.entries.find(e => e.timestamp === timestamp);
+            if (!entry) return;
+
+            // Aller sur l'onglet Entrée
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('entry').classList.add('active');
+            document.querySelector('.tab').classList.add('active');
+
+            // Pré-remplir le formulaire
+            document.getElementById('entryCompany').value = entry.company || '';
+            document.getElementById('entryPhoneFixe').value = entry.phoneFixe || '';
+            document.getElementById('entryPhoneMobile').value = entry.phoneMobile || '';
+            document.getElementById('entryAddress').value = entry.address || '';
+            document.getElementById('entryDate').value = entry.date || '';
+            document.getElementById('entryQuantity').value = entry.quantity || '';
+            document.getElementById('entryPrice').value = entry.price || '';
+            document.getElementById('entryNotes').value = entry.notes || '';
+
+            // Supprimer l'ancienne entrée et changer le bouton
+            data.entries = data.entries.filter(e => e.timestamp !== timestamp);
+            saveData();
+            updateDisplay();
+
+            const btn = document.querySelector('#entry .btn');
+            btn.textContent = '💾 Enregistrer la modification';
+            btn.style.background = 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
+
+            // Remettre le bouton normal après soumission
+            const form = document.querySelector('#entry form');
+            const originalOnsubmit = form.onsubmit;
+            form.onsubmit = function(e) {
+                btn.textContent = "Enregistrer l'entrée";
+                btn.style.background = '';
+                form.onsubmit = originalOnsubmit;
+                addEntry(e);
+            };
+
+            alert('📝 Formulaire pré-rempli — modifiez puis enregistrez !');
+        }
+
+        // Modifier une sortie
+        function editExit(timestamp) {
+            const exit = data.exits.find(e => e.timestamp === timestamp);
+            if (!exit) return;
+
+            // Aller sur l'onglet Sortie
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('exit').classList.add('active');
+            document.querySelectorAll('.tab')[1].classList.add('active');
+
+            // Pré-remplir
+            document.getElementById('exitDate').value = exit.date || '';
+            document.getElementById('exitWheelbarrows').value = exit.wheelbarrows || '';
+            updateExitEquivalent();
+
+            // Supprimer l'ancienne sortie
+            data.exits = data.exits.filter(e => e.timestamp !== timestamp);
+            saveData();
+            updateDisplay();
+
+            const btn = document.querySelector('#exit .btn');
+            btn.textContent = '💾 Enregistrer la modification';
+            btn.style.background = 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
+
+            const form = document.querySelector('#exit form');
+            const originalOnsubmit = form.onsubmit;
+            form.onsubmit = function(e) {
+                btn.textContent = 'Enregistrer la sortie';
+                btn.style.background = '';
+                form.onsubmit = originalOnsubmit;
+                addExit(e);
+            };
+
+            alert('📝 Formulaire pré-rempli — modifiez puis enregistrez !');
+        }
+
         window.addEntry = addEntry;
         window.addExit = addExit;
         window.switchTab = switchTab;
@@ -928,6 +1032,10 @@
         window.saveSettings = saveSettings;
         window.syncToFirebase = syncToFirebase;
         window.updateExitEquivalent = updateExitEquivalent;
+        window.deleteEntry = deleteEntry;
+        window.deleteExit = deleteExit;
+        window.editEntry = editEntry;
+        window.editExit = editExit;
 
         loadData();
         updateConnectionStatus(navigator.onLine);
